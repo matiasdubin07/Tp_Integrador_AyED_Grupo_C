@@ -75,7 +75,6 @@ while(fread(&com, sizeof(ComandaHistorica), 1, fHistoricas)==1){
  int buscarMozo = buscarMozoPorNombre(mozos, cantMozos, com.nombreMozo);
  if(buscarMozo==-1){
     mozos[cantMozos].idMozo=cantMozos++;
-    mozos
  };
 };
 
