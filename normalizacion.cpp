@@ -1,11 +1,10 @@
-#include <cstdio>
-#include <cstring>
-
-const int MAX_COMANDAS = 1000;
-const int MAX_MOZOS = 100;
-const int MAX_DIAS = 100;
+#include <iostream>
+#include <fstream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+using namespace std;
 const int K = 5;
-
 struct ComandaHistorica {
     char fecha[11];
     char nombreMozo[50];
@@ -25,7 +24,7 @@ struct Mozo {
     int idMozo;
     char nombre[50];
     char password[20];
-    float totalComision;
+    float totalcomision;
 };
 
 struct Comanda {
@@ -34,128 +33,104 @@ struct Comanda {
     int cantidad;
     float comision;
 };
+struct ComandaProcesada {
+    char fecha[11]; 
+    Comanda comanda;
+};
+void encriptar(char* pass, int k) {
+    // Recorre el arreglo de caracteres hasta encontrar el final '\0'
+    for (int i = 0; pass[i] != '\0'; i++) {
+        pass[i] = pass[i] + k; // Suma K al valor ASCII del carácter
+    }
+}
+
+int buscarMozoPorNombre(Mozo mozos[], int cantMozos, const char* nombre) {
+    for (int i = 0; i < cantMozos; i++) {
+        if (strcmp(mozos[i].nombre, nombre) == 0){
+            return i;
+        }
+    }
+    return -1;
+}
+
 
 int main() {
-    FILE* archivoHistoricas = fopen("comandas_historicas.dat", "rb");
-    FILE* archivoInventario = fopen("inventario.dat", "r+b");
-
-    if (archivoHistoricas == NULL || archivoInventario == NULL) {
-        printf("Faltan los archivos de datos.\n");
+FILE* fHistoricas = fopen("comandas_historicas.dat", "rb");
+    if (!fHistoricas) { // Si falla (porque no pusiste el archivo ahí), tira error y sale
+        cout << "Error al abrir comandas_historicas.dat\n";
         return 1;
     }
-
-    ComandaHistorica historicas[MAX_COMANDAS];
-    Mozo mozos[MAX_MOZOS] = {};
-    char fechas[MAX_DIAS][11] = {};
-
-    int cantidadHistoricas = 0;
-    while (fread(&historicas[cantidadHistoricas], sizeof(ComandaHistorica), 1, archivoHistoricas) == 1) {
-        cantidadHistoricas++;
-        if (cantidadHistoricas == MAX_COMANDAS) break;
+    FILE* fInventario = fopen("inventario.dat", "r+b");
+    if (!fInventario) {
+        cout << "Error al abrir inventario.dat\n";
+        fclose(fHistoricas); // Hay que cerrar el historial abierto antes de salir
+        return 1;
     }
-    fclose(archivoHistoricas);
+    Mozo mozos[100];
+    int cantMozos = 0;
+    ComandaProcesada comandas[10000];
+    int cantComandas = 0;
+ComandaHistorica com;
+while(fread(&com, sizeof(ComandaHistorica), 1, fHistoricas)==1){
+ int buscarMozo = buscarMozoPorNombre(mozos, cantMozos, com.nombreMozo);
+ if(buscarMozo==-1){
+    mozos[cantMozos].idMozo=cantMozos++;
+    mozos
+ };
+};
 
-    int cantidadMozos = 0;
-    int cantidadFechas = 0;
+};
 
-    for (int i = 0; i < cantidadHistoricas; i++) {
-        int posicionMozo = -1;
 
-        for (int j = 0; j < cantidadMozos; j++) {
-            if (strcmp(mozos[j].nombre, historicas[i].nombreMozo) == 0) {
-                posicionMozo = j;
-            }
-        }
 
-        if (posicionMozo == -1) {
-            posicionMozo = cantidadMozos;
-            mozos[posicionMozo].idMozo = cantidadMozos + 1;
-            strcpy(mozos[posicionMozo].nombre, historicas[i].nombreMozo);
 
-            char clave[20];
-            sprintf(clave, "%d", mozos[posicionMozo].idMozo);
-            for (int j = 0; clave[j] != '\0'; j++) {
-                mozos[posicionMozo].password[j] = clave[j] + K;
-            }
-            cantidadMozos++;
-        }
 
-        mozos[posicionMozo].totalComision += historicas[i].comision;
 
-        int fechaNueva = 1;
-        for (int j = 0; j < cantidadFechas; j++) {
-            if (strcmp(fechas[j], historicas[i].fecha) == 0) {
-                fechaNueva = 0;
-            }
-        }
 
-        char nombreArchivo[40];
-        sprintf(nombreArchivo, "comandas_%s.dat", historicas[i].fecha);
-        FILE* archivoDia;
 
-        if (fechaNueva == 1) {
-            strcpy(fechas[cantidadFechas], historicas[i].fecha);
-            cantidadFechas++;
-            archivoDia = fopen(nombreArchivo, "wb");
-        } else {
-            archivoDia = fopen(nombreArchivo, "ab");
-        }
 
-        Comanda comanda;
-        comanda.idMozo = mozos[posicionMozo].idMozo;
-        comanda.codigoProducto = historicas[i].codigoProducto;
-        comanda.cantidad = historicas[i].cantidad;
-        comanda.comision = historicas[i].comision;
-        fwrite(&comanda, sizeof(Comanda), 1, archivoDia);
-        fclose(archivoDia);
 
-        Producto producto;
-        rewind(archivoInventario);
-        while (fread(&producto, sizeof(Producto), 1, archivoInventario) == 1) {
-            if (producto.codigo == historicas[i].codigoProducto) {
-                producto.stockActual -= historicas[i].cantidad;
-                fseek(archivoInventario, -sizeof(Producto), SEEK_CUR);
-                fwrite(&producto, sizeof(Producto), 1, archivoInventario);
-                break;
-            }
-        }
-    }
-    fclose(archivoInventario);
 
-    FILE* archivoMozos = fopen("mozos.dat", "wb");
-    fwrite(mozos, sizeof(Mozo), cantidadMozos, archivoMozos);
-    fclose(archivoMozos);
 
-    for (int i = 0; i < cantidadFechas; i++) {
-        char nombreArchivo[40];
-        sprintf(nombreArchivo, "comandas_%s.dat", fechas[i]);
 
-        FILE* archivoDia = fopen(nombreArchivo, "rb");
-        Comanda comandasDia[MAX_COMANDAS];
-        int cantidadDia = 0;
 
-        while (fread(&comandasDia[cantidadDia], sizeof(Comanda), 1, archivoDia) == 1) {
-            cantidadDia++;
-        }
-        fclose(archivoDia);
 
-        for (int j = 0; j < cantidadDia - 1; j++) {
-            for (int k = 0; k < cantidadDia - j - 1; k++) {
-                if (comandasDia[k].idMozo > comandasDia[k + 1].idMozo) {
-                    Comanda auxiliar = comandasDia[k];
-                    comandasDia[k] = comandasDia[k + 1];
-                    comandasDia[k + 1] = auxiliar;
-                }
-            }
-        }
 
-        archivoDia = fopen(nombreArchivo, "wb");
-        fwrite(comandasDia, sizeof(Comanda), cantidadDia, archivoDia);
-        fclose(archivoDia);
-    }
 
-    printf("Normalizacion terminada.\n");
-    printf("Mozos: %d\n", cantidadMozos);
-    printf("Dias: %d\n", cantidadFechas);
-    return 0;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void crearArchivo(const char* nombre) {
+ FILE* f = fopen(nombre, "wb");
+ if (f == NULL) { cout << "No se pudo crear." << endl; return; }
+ Registro r;
+ cout << "Clave (0 para terminar): ";
+ cin >> r.clave;
+ while (r.clave > 0) {
+ cout << "Descripcion: "; cin >> r.descripcion; // char[]: una palabra
+ cout << "Valor: "; cin >> r.valor;
+ fwrite(&r, sizeof(Registro), 1, f);
+ cout << "Clave (0 para terminar): ";
+ cin >> r.clave;
+ }
+ fclose(f);
+ cout << "Archivo creado." << endl;
 }
