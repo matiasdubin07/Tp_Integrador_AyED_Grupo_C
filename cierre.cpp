@@ -11,12 +11,6 @@ struct Comanda{
 };
 
 const int Max_Archivos=7;
-FILE* archivos[Max_Archivos];
-Comanda r[Max_Archivos];
-int leido[Max_Archivos]; // 1 si hay registro cargado, 0 si no existe ningun registro cargado
-int cantidad_archivos;
-
-
 
 FILE* PedirYAbrirArchivoDelDia(){
     char fecha[11];
@@ -35,12 +29,28 @@ FILE* PedirYAbrirArchivoDelDia(){
 
 
 
+int BuscarMenor( Comanda r[], int leido[], int cantidad){
+    int pos=-1;
+    for(int i=0; i<cantidad; i++){
+        if(leido[i]==1 && (pos==-1 || r[i].idMozo < r[pos].idMozo)){
+            pos=i;
+        }
+    }
+    return pos;
+}
+
+
+
 int main(){
+    FILE* archivos[Max_Archivos];
+    Comanda r[Max_Archivos];
+    int leido[Max_Archivos]; // 1 si hay registro cargado, 0 si no existe ningun registro cargado
+    int cantidad_archivos;  
     cout<<"Cuantos dias trabajo esta semana";
     cin>>cantidad_archivos;
-    for(int i=0; i<cantidad_archivos; i++){
+     for(int i=0; i<cantidad_archivos; i++){
         archivos[i]=PedirYAbrirArchivoDelDia();
-        if(archivos[i]==NULL){
+         if(archivos[i]==NULL){
             cout<<"No se pudo abrir el archivo del dia "<<i+1<<endl;
             leido[i]=0;
         }
