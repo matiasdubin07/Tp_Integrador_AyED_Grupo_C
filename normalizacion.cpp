@@ -71,16 +71,42 @@ FILE* fHistoricas = fopen("comandas_historicas.dat", "rb");
     int cantComandas = 0;
 ComandaHistorica com;
 while (fread(&com, sizeof(ComandaHistorica), 1, fHistoricas) == 1) {
+
+    // --- MOZOS ---
     int buscarMozo = buscarMozoPorNombre(mozos, cantMozos, com.nombreMozo);
+    int idActual;
     if (buscarMozo == -1) {
-        mozos[cantMozos].idMozo = cantMozos + 1;
+        idActual = cantMozos + 1;
+        mozos[cantMozos].idMozo = idActual;
         strcpy(mozos[cantMozos].nombre, com.nombreMozo);
         mozos[cantMozos].totalcomision = com.comision;
-        sprintf(mozos[cantMozos].password, "%d", mozos[cantMozos].idMozo);
+        sprintf(mozos[cantMozos].password, "%d", idActual);
         encriptar(mozos[cantMozos].password, K);
         cantMozos++;
     } else {
+        idActual = mozos[buscarMozo].idMozo;
         mozos[buscarMozo].totalcomision += com.comision;
+    }
+
+    // --- GUARDAR COMANDA EN MEMORIA ---
+    strcpy(comandas[cantComandas].fecha, com.fecha);
+    comandas[cantComandas].comanda.idMozo = idActual;
+    comandas[cantComandas].comanda.codigoProducto = com.codigoProducto;
+    comandas[cantComandas].comanda.cantidad = com.cantidad;
+    comandas[cantComandas].comanda.comision = com.comision;
+    cantComandas++;
+
+    // --- DESCONTAR STOCK DEL INVENTARIO ---
+    fseek(fInventario, 0, SEEK_SET);
+    Producto p;
+    while (fread(&p, sizeof(Producto), 1, fInventario) == 1) {
+        if (p.codigo == com.codigoProducto) {
+            p.stockActual -= com.cantidad;
+            fseek(fInventario, -(long)sizeof(Producto), SEEK_CUR);
+            fwrite(&p, sizeof(Producto), 1, fInventario);
+            fflush(fInventario);
+            break;
+        }
     }
 }
 FILE* fMozos = fopen("mozos.dat", "wb");
