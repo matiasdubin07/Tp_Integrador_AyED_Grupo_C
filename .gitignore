@@ -1,15 +1,11 @@
-# Ejecutables
 normalizacion
 ventas
 cierre
 resumen
 *.exe
 
-# Archivos .dat generados por los programas
 *.dat
 
-# Mantener los archivos .dat provistos por la cátedra
 !datos/*.dat
 
-# Archivos de configuración de IDE
 .vscode/
