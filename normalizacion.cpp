@@ -52,6 +52,18 @@ int buscarMozoPorNombre(Mozo mozos[], int cantMozos, const char* nombre) {
     return -1;
 }
 
+void ordenarComandas(ComandaProcesada comandas[], int cant) {
+    for (int i = 0; i < cant - 1; i++) {
+        for (int j = 0; j < cant - i - 1; j++) {
+            int cmpFecha = strcmp(comandas[j].fecha, comandas[j+1].fecha);
+            if (cmpFecha > 0 || (cmpFecha == 0 && comandas[j].comanda.idMozo > comandas[j+1].comanda.idMozo)) {
+                ComandaProcesada temp = comandas[j];
+                comandas[j] = comandas[j+1];
+                comandas[j+1] = temp;
+            }
+        }
+    }
+}
 
 int main() {
 FILE* fHistoricas = fopen("comandas_historicas.dat", "rb");
@@ -123,6 +135,34 @@ for (int i = 0; i < cantMozos; i++) {
 
 fclose(fMozos);
 cout << "Se creó el archivo con todos los mozos perfectamente!!"<< endl;
+
+// --- ORDENAR Y SEPARAR COMANDAS POR DIA ---
+ordenarComandas(comandas, cantComandas);
+
+if (cantComandas > 0) {
+    char fechaActual[11];
+    strcpy(fechaActual, comandas[0].fecha);
+    char nombreArchivo[50];
+    sprintf(nombreArchivo, "comandas_%s.dat", fechaActual);
+    FILE* fDia = fopen(nombreArchivo, "wb");
+    if (fDia) {
+        for (int i = 0; i < cantComandas; i++) {
+            if (strcmp(comandas[i].fecha, fechaActual) != 0) {
+                fclose(fDia);
+                strcpy(fechaActual, comandas[i].fecha);
+                sprintf(nombreArchivo, "comandas_%s.dat", fechaActual);
+                fDia = fopen(nombreArchivo, "wb");
+            }
+            if (fDia) {
+                fwrite(&comandas[i].comanda, sizeof(Comanda), 1, fDia);
+            }
+        }
+        if (fDia) fclose(fDia);
+    }
+}
+cout << "Se separaron las ventas por dia perfectamente!!" << endl;
+
 fclose(fHistoricas);
 fclose(fInventario);
-};
+return 0;
+}
