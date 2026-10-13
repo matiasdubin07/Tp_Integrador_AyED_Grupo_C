@@ -23,7 +23,7 @@ void CerrarArchivos(FILE* archivos[], int cantidad_archivos);
 int main(){
     FILE* archivos[Max_Archivos];
     Comanda r[Max_Archivos];
-    int leido[Max_Archivos]; // 1 si hay registro cargado, 0 si no existe ningun registro cargado
+    int leido[Max_Archivos];
     int cantidad_archivos= PedirCantidadDias();
     CargarArchivosDelDia(archivos, r, leido, cantidad_archivos);
      
@@ -34,6 +34,7 @@ int main(){
         return 1;
     }
     int grabados=Apareo(archivos, r, leido, cantidad_archivos, salida);
+    cout<<"Se grabaron "<<grabados<<" registros en la planilla semanal."<<endl;
     fclose(salida);
     CerrarArchivos(archivos, cantidad_archivos);
     return 0;
@@ -41,15 +42,20 @@ int main(){
 
 int PedirCantidadDias(){
     int cantidad_archivos;
-    cout<<"Cuantos dias trabajo esta semana";
-    cin>>cantidad_archivos;
+    do {
+        cout<<"Cuantos dias trabajo esta semana (1-"<<Max_Archivos<<"): ";
+        cin>>cantidad_archivos;
+        if(cantidad_archivos<=0 || cantidad_archivos>Max_Archivos){
+            cout<<"Error: ingrese entre 1 y "<<Max_Archivos<<"."<<endl;
+        }
+    } while(cantidad_archivos<=0 || cantidad_archivos>Max_Archivos);
     return cantidad_archivos;
 }
 
 void CargarArchivosDelDia(FILE* archivos[], Comanda r[], int leido[], int cantidad_archivos){
     for(int i=0; i<cantidad_archivos; i++){
         archivos[i]=PedirYAbrirArchivoDelDia();
-         if(archivos[i]==NULL){
+        if(archivos[i]==NULL){
             leido[i]=0;
         }
     }
@@ -62,7 +68,7 @@ void CargarArchivosDelDia(FILE* archivos[], Comanda r[], int leido[], int cantid
 
 FILE* PedirYAbrirArchivoDelDia(){
     char fecha[11];
-    cout<<"Ingrese la fecha del dia (DD-MM-AAAA)";
+    cout<<"Ingrese la fecha del dia (DD-MM-AAAA): ";
     cin>>fecha;
     char nombreArchivo[30];
     strcpy(nombreArchivo, "comandas_");
@@ -99,7 +105,7 @@ int Apareo(FILE* archivos[], Comanda r[], int leido[], int cantidad_archivos, FI
     return grabados;
 }
 
-int BuscarMenor( Comanda r[], int leido[], int cantidad){
+int BuscarMenor(Comanda r[], int leido[], int cantidad){
     int pos=-1;
     for(int i=0; i<cantidad; i++){
         if(leido[i]==1 && (pos==-1 || r[i].idMozo < r[pos].idMozo)){
