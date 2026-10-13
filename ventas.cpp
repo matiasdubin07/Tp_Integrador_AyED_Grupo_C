@@ -1,5 +1,8 @@
+#include <iostream>
 #include <cstdio>
 #include <cstring>
+
+using namespace std;
 
 struct Mozo
 {
@@ -89,7 +92,7 @@ bool loginMozo(int idMozo)
 
     if (f == NULL)
     {
-        printf("No se pudo abrir mozos.dat. Corrieron normalizacion antes?\n");
+        cout << "No se pudo abrir mozos.dat. Corrieron normalizacion antes?" << endl;
         return false;
     }
 
@@ -107,7 +110,7 @@ bool loginMozo(int idMozo)
 
     if (!existe)
     {
-        printf("Error: el mozo %d no existe.\n", idMozo);
+        cout << "Error: el mozo " << idMozo << " no existe." << endl;
         fclose(f);
         return false;
     }
@@ -116,8 +119,8 @@ bool loginMozo(int idMozo)
     {
         char nueva[20];
 
-        printf("Es tu primera vez. Elegi tu clave: ");
-        scanf("%19s", nueva);
+        cout << "Es tu primera vez. Elegi tu clave: ";
+        cin >> nueva;
 
         encriptar(nueva);
         strcpy(m.password, nueva);
@@ -126,7 +129,7 @@ bool loginMozo(int idMozo)
         fwrite(&m, sizeof(Mozo), 1, f);
         fclose(f);
 
-        printf("Clave guardada. Bienvenido, %s.\n", m.nombre);
+        cout << "Clave guardada. Bienvenido, " << m.nombre << "." << endl;
         return true;
     }
 
@@ -134,8 +137,8 @@ bool loginMozo(int idMozo)
 
     char clave[20];
 
-    printf("Clave: ");
-    scanf("%19s", clave);
+    cout << "Clave: ";
+    cin >> clave;
 
     char claveGuardada[20];
     strcpy(claveGuardada, m.password);
@@ -143,11 +146,11 @@ bool loginMozo(int idMozo)
 
     if (strcmp(clave, claveGuardada) != 0)
     {
-        printf("Error: clave incorrecta.\n");
+        cout << "Error: clave incorrecta." << endl;
         return false;
     }
 
-    printf("Bienvenido, %s.\n", m.nombre);
+    cout << "Bienvenido, " << m.nombre << "." << endl;
     return true;
 }
 
@@ -189,15 +192,15 @@ void cargarVenta(int idMozo, const char nombreArchivoDia[])
     int codigo;
     int cantidad;
 
-    printf("Codigo de producto: ");
-    scanf("%d", &codigo);
+    cout << "Codigo de producto: ";
+    cin >> codigo;
 
-    printf("Cantidad: ");
-    scanf("%d", &cantidad);
+    cout << "Cantidad: ";
+    cin >> cantidad;
 
     if (cantidad <= 0)
     {
-        printf("Error: la cantidad tiene que ser mayor a 0.\n");
+        cout << "Error: la cantidad tiene que ser mayor a 0." << endl;
         return;
     }
 
@@ -205,7 +208,7 @@ void cargarVenta(int idMozo, const char nombreArchivoDia[])
 
     if (fInv == NULL)
     {
-        printf("No se pudo abrir inventario.dat\n");
+        cout << "No se pudo abrir inventario.dat" << endl;
         return;
     }
 
@@ -214,14 +217,14 @@ void cargarVenta(int idMozo, const char nombreArchivoDia[])
 
     if (!buscarProducto(fInv, codigo, p, pos))
     {
-        printf("Error: el producto %d no existe.\n", codigo);
+        cout << "Error: el producto " << codigo << " no existe." << endl;
         fclose(fInv);
         return;
     }
 
     if (p.stockActual < cantidad)
     {
-        printf("Error: stock insuficiente de '%s' (quedan %d).\n", p.descripcion, p.stockActual);
+        cout << "Error: stock insuficiente de '" << p.descripcion << "' (quedan " << p.stockActual << ")." << endl;
         fclose(fInv);
         return;
     }
@@ -241,7 +244,7 @@ void cargarVenta(int idMozo, const char nombreArchivoDia[])
 
     if (fDia == NULL)
     {
-        printf("No se pudo abrir la planilla del dia.\n");
+        cout << "No se pudo abrir la planilla del dia." << endl;
         return;
     }
 
@@ -265,7 +268,15 @@ void cargarVenta(int idMozo, const char nombreArchivoDia[])
         fclose(fMozos);
     }
 
-    printf("Venta cargada: %d x %s | comision: %.2f\n", cantidad, p.descripcion, c.comision);
+    int enteros = (int)c.comision;
+    int centavos = (int)((c.comision - enteros) * 100 + 0.5);
+
+    cout << "Venta cargada: " << cantidad << " x " << p.descripcion << " | comision: " << enteros << ".";
+    if (centavos < 10)
+    {
+        cout << "0";
+    }
+    cout << centavos << endl;
 }
 
 void ordenarPorMozo(const char nombreArchivo[])
@@ -308,14 +319,14 @@ int main()
     char fecha[11];
     char nombreArchivoDia[40];
 
-    printf("Fecha del dia (DD-MM-AAAA): ");
-    scanf("%10s", fecha);
+    cout << "Fecha del dia (DD-MM-AAAA): ";
+    cin >> fecha;
 
     while (!fechaValida(fecha))
     {
-        printf("Formato invalido. Ejemplo: 03-06-2025\n");
-        printf("Fecha del dia (DD-MM-AAAA): ");
-        scanf("%10s", fecha);
+        cout << "Formato invalido. Ejemplo: 03-06-2025" << endl;
+        cout << "Fecha del dia (DD-MM-AAAA): ";
+        cin >> fecha;
     }
 
     armarNombreArchivo(fecha, nombreArchivoDia);
@@ -324,7 +335,7 @@ int main()
 
     if (fDia == NULL)
     {
-        printf("No se pudo abrir ni crear %s\n", nombreArchivoDia);
+        cout << "No se pudo abrir ni crear " << nombreArchivoDia << endl;
         return 1;
     }
 
@@ -334,18 +345,18 @@ int main()
 
     while (opcion != 0)
     {
-        printf("\n===== BUFFET DE ALBERTO - Ventas del %s =====\n", fecha);
-        printf("1. Cargar una venta\n");
-        printf("0. Terminar\n");
-        printf("Opcion: ");
-        scanf("%d", &opcion);
+        cout << "\n===== BUFFET DE ALBERTO - Ventas del " << fecha << " =====" << endl;
+        cout << "1. Cargar una venta" << endl;
+        cout << "0. Terminar" << endl;
+        cout << "Opcion: ";
+        cin >> opcion;
 
         if (opcion == 1)
         {
             int idMozo;
 
-            printf("Numero de mozo: ");
-            scanf("%d", &idMozo);
+            cout << "Numero de mozo: ";
+            cin >> idMozo;
 
             if (loginMozo(idMozo))
             {
@@ -354,12 +365,12 @@ int main()
         }
         else if (opcion != 0)
         {
-            printf("Opcion invalida.\n");
+            cout << "Opcion invalida." << endl;
         }
     }
 
     ordenarPorMozo(nombreArchivoDia);
-    printf("Planilla %s ordenada por mozo. Hasta luego!\n", nombreArchivoDia);
+    cout << "Planilla " << nombreArchivoDia << " ordenada por mozo. Hasta luego!" << endl;
 
     return 0;
 }
