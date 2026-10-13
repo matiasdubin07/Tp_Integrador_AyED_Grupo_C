@@ -248,6 +248,23 @@ void cargarVenta(int idMozo, const char nombreArchivoDia[])
     fwrite(&c, sizeof(Comanda), 1, fDia);
     fclose(fDia);
 
+    FILE* fMozos = fopen("mozos.dat", "rb+");
+    if (fMozos != NULL)
+    {
+        Mozo m;
+        while (fread(&m, sizeof(Mozo), 1, fMozos) == 1)
+        {
+            if (m.idMozo == idMozo)
+            {
+                m.totalComision += c.comision;
+                fseek(fMozos, -(long)sizeof(Mozo), SEEK_CUR);
+                fwrite(&m, sizeof(Mozo), 1, fMozos);
+                break;
+            }
+        }
+        fclose(fMozos);
+    }
+
     printf("Venta cargada: %d x %s | comision: %.2f\n", cantidad, p.descripcion, c.comision);
 }
 
