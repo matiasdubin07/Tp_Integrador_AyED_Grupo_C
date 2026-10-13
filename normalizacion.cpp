@@ -89,7 +89,6 @@ int main() {
             mozos[cantMozos].idMozo = idActual;
             strcpy(mozos[cantMozos].nombre, com.nombreMozo);
             mozos[cantMozos].totalComision = com.comision;
-            // Clave inicial = ID del mozo como texto, encriptado con K=5 (igual que ventas.cpp)
             char claveInicial[20];
             sprintf(claveInicial, "%d", idActual);
             for (int k = 0; claveInicial[k] != '\0'; k++) {
