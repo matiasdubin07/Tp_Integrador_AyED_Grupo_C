@@ -24,7 +24,7 @@ struct Mozo {
     int idMozo;
     char nombre[50];
     char password[20];
-    float totalcomision;
+    float totalComision;
 };
 
 struct Comanda {
@@ -88,12 +88,18 @@ int main() {
             idActual = cantMozos + 1;
             mozos[cantMozos].idMozo = idActual;
             strcpy(mozos[cantMozos].nombre, com.nombreMozo);
-            mozos[cantMozos].totalcomision = com.comision;
-            memset(mozos[cantMozos].password, 0, sizeof(mozos[cantMozos].password));
+            mozos[cantMozos].totalComision = com.comision;
+            // Clave inicial = ID del mozo como texto, encriptado con K=5 (igual que ventas.cpp)
+            char claveInicial[20];
+            sprintf(claveInicial, "%d", idActual);
+            for (int k = 0; claveInicial[k] != '\0'; k++) {
+                claveInicial[k] += 5;
+            }
+            strcpy(mozos[cantMozos].password, claveInicial);
             cantMozos++;
         } else {
             idActual = mozos[buscarMozo].idMozo;
-            mozos[buscarMozo].totalcomision += com.comision;
+            mozos[buscarMozo].totalComision += com.comision;
         }
 
         strcpy(comandas[cantComandas].fecha, com.fecha);
