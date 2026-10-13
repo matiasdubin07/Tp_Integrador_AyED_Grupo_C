@@ -1,9 +1,3 @@
-// resumen.cpp - Resumen del cierre semanal (El buffet de Alberto)
-// Lee:  comandas_semana_sX-mm.dat (ordenado por idMozo)
-// Muestra por pantalla: por cada mozo, productos vendidos y comision a pagar,
-// y al final el total de productos vendidos por el buffet.
-// Tecnica: CORTE DE CONTROL (el archivo esta ordenado por idMozo).
-
 #include <iostream>
 #include <cstdio>   
 using namespace std;
